@@ -1,33 +1,33 @@
 import * as dao from "./dao.js";
 
 export default function CourseRoutes(app) {
-  const findAllCourses = (req, res) => {
-    const courses = dao.findAllCourses();
+  const findAllCourses = async (req, res) => {
+    const courses = await dao.findAllCourses();
     res.json(courses);
   };
 
-  const findCourseById = (req, res) => {
+  const findCourseById = async (req, res) => {
     const { courseId } = req.params;
-    const course = dao.findCourseById(courseId);
+    const course = await dao.findCourseById(courseId);
     res.json(course);
   };
 
-  const createCourse = (req, res) => {
-    const course = dao.createCourse(req.body);
+  const createCourse = async (req, res) => {
+    const course = await dao.createCourse(req.body);
     res.json(course);
   };
 
-  const deleteCourse = (req, res) => {
+  const deleteCourse = async (req, res) => {
     const { courseId } = req.params;
-    dao.deleteCourse(courseId);
+    await dao.deleteCourse(courseId);
     res.sendStatus(204);
   };
 
-  const updateCourse = (req, res) => {
+  const updateCourse = async (req, res) => {
     const { courseId } = req.params;
     const courseUpdates = req.body;
-    const status = dao.updateCourse(courseId, courseUpdates);
-    res.json(status);
+    await dao.updateCourse(courseId, courseUpdates);
+    res.sendStatus(204);
   };
 
   app.get("/api/courses", findAllCourses);
