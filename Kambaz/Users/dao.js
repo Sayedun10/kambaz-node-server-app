@@ -1,37 +1,32 @@
-import Database from "../Database/index.js";
+import model from "./model.js";
 
 export function findAllUsers() {
-  return Database.users;
+  return model.find();
 }
 
 export function findUserById(userId) {
-  return Database.users.find((user) => user._id === userId);
+  return model.findById(userId);
 }
 
 export function findUserByUsername(username) {
-  return Database.users.find((user) => user.username === username);
+  return model.findOne({ username: username });
 }
 
 export function findUserByCredentials(username, password) {
-  return Database.users.find(
-    (user) => user.username === username && user.password === password
-  );
+  return model.findOne({ username: username, password: password });
 }
 
 export function createUser(user) {
-  const newUser = { ...user, _id: Date.now().toString() };
-  Database.users = [...Database.users, newUser];
-  return newUser;
+  if (!user._id) {
+    user._id = Date.now().toString();
+  }
+  return model.create(user);
 }
 
 export function updateUser(userId, user) {
-  const { users } = Database;
-  const userIndex = users.findIndex((u) => u._id === userId);
-  users[userIndex] = { ...users[userIndex], ...user };
-  return users[userIndex];
+  return model.updateOne({ _id: userId }, { $set: user });
 }
 
 export function deleteUser(userId) {
-  const { users } = Database;
-  Database.users = users.filter((user) => user._id !== userId);
+  return model.deleteOne({ _id: userId });
 }
