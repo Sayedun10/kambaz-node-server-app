@@ -10,7 +10,11 @@ export function findCourseById(courseId) {
 
 export function createCourse(course) {
   delete course._id;
-  return model.create(course);
+  const newCourse = {
+    ...course,
+    _id: `COURSE_${Date.now()}`,
+  };
+  return model.create(newCourse);
 }
 
 export function deleteCourse(courseId) {

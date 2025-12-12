@@ -6,7 +6,11 @@ export function findAssignmentsForCourse(courseId) {
 
 export function createAssignment(assignment) {
   delete assignment._id;
-  return model.create(assignment);
+  const newAssignment = {
+    ...assignment,
+    _id: `ASSIGNMENT_${Date.now()}`,
+  };
+  return model.create(newAssignment);
 }
 
 export function deleteAssignment(assignmentId) {

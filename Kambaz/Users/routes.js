@@ -13,17 +13,6 @@ export default function UserRoutes(app) {
   };
 
   const findAllUsers = (req, res) => {
-    const { role, name } = req.query;
-    if (role) {
-      const users = dao.findUsersByRole(role);
-      res.json(users);
-      return;
-    }
-    if (name) {
-      const users = dao.findUsersByPartialName(name);
-      res.json(users);
-      return;
-    }
     const users = dao.findAllUsers();
     res.json(users);
   };
@@ -34,31 +23,54 @@ export default function UserRoutes(app) {
     res.json(user);
   };
 
-  const updateUser = (req, res) => {
+  const updateUser = async (req, res) => {
     const { userId } = req.params;
     const userUpdates = req.body;
-    dao.updateUser(userId, userUpdates);
-    res.sendStatus(204);
+    await dao.updateUser(userId, userUpdates);
+    const currentUser = await dao.findUserById(userId);
+    req.session["currentUser"] = currentUser;
+    res.json(currentUser);
   };
 
-  const signup = (req, res) => {
-    const user = dao.findUserByUsername(req.body.username);
+  const signup = async (req, res) => {
+    const user = await dao.findUserByUsername(req.body.username);
     if (user) {
       res.status(400).json({ message: "Username already taken" });
       return;
     }
-    const currentUser = dao.createUser(req.body);
+    const currentUser = await dao.createUser(req.body);
+    req.session["currentUser"] = currentUser;
     res.json(currentUser);
   };
 
-  const signin = (req, res) => {
+  const signin = async (req, res) => {
     const { username, password } = req.body;
-    const currentUser = dao.findUserByCredentials(username, password);
+    const currentUser = await dao.findUserByCredentials(username, password);
     if (currentUser) {
+      req.session["currentUser"] = currentUser;
       res.json(currentUser);
     } else {
       res.status(401).json({ message: "Unable to login. Try again later." });
     }
+  };
+
+  const profile = async (req, res) => {
+    const currentUser = req.session["currentUser"];
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+    res.json(currentUser);
+  };
+
+  const signout = async (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        res.sendStatus(500);
+      } else {
+        res.sendStatus(200);
+      }
+    });
   };
 
   app.post("/api/users", createUser);
@@ -68,4 +80,6 @@ export default function UserRoutes(app) {
   app.delete("/api/users/:userId", deleteUser);
   app.post("/api/users/signup", signup);
   app.post("/api/users/signin", signin);
+  app.post("/api/users/profile", profile);
+  app.post("/api/users/signout", signout);
 }

@@ -6,7 +6,12 @@ export function findModulesForCourse(courseId) {
 
 export function createModule(module) {
   delete module._id;
-  return model.create(module);
+  const newModule = {
+    ...module,
+    _id: `MODULE_${Date.now()}`,
+    lessons: [],
+  };
+  return model.create(newModule);
 }
 
 export function deleteModule(moduleId) {
